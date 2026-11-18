@@ -1,0 +1,14 @@
+{
+	"Count": 0,
+	"Nodes": {
+		"WARNING in exc_debug_kernel": {
+			"Count": 3,
+			"Nodes": {
+				"kernel panic: kernel: panic_on_warn set ...": {
+					"Count": 3,
+					"Nodes": null
+				}
+			}
+		}
+	}
+}

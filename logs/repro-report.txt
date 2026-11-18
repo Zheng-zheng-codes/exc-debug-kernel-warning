@@ -1,0 +1,74 @@
+------------[ cut here ]------------
+dr6 & DR_STEP
+WARNING: arch/x86/kernel/traps.c:1286 at exc_debug_kernel+0x1c5/0x230 arch/x86/kernel/traps.c:1286, CPU#3: syz.1.18/71843
+Modules linked in: ext2(E) rdma_ucm(E) ib_uverbs(E) ib_uverbs_support(E) ib_iser(E) libiscsi(E) rdma_cm(E) iw_cm(E) ib_cm(E) rdma_rxe(E) smc(E) ib_core(E) nbd(E) dm_multipath(E)
+CPU: 3 UID: 0 PID: 71843 Comm: syz.1.18 Tainted: G            EL      7.4.0-rc3-kernsight-kasan #1 PREEMPT(full) 
+Tainted: [E]=UNSIGNED_MODULE, [L]=SOFTLOCKUP
+Hardware name: QEMU Standard PC (i440FX + PIIX, 1996), BIOS 1.15.0-1 04/01/2014
+RIP: 0010:exc_debug_kernel+0x1c5/0x230 arch/x86/kernel/traps.c:1286
+Code: ff 0f 1f 44 00 00 4c 8b 24 24 31 ff 41 81 e4 00 40 00 00 4c 89 e6 0f 1f 44 00 00 4d 85 e4 0f 84 32 ff ff ff 0f 1f 44 00 00 90 <0f> 0b 90 48 81 a5 90 00 00 00 ff fe ff ff e9 19 ff ff ff 0f 1f 44
+RSP: 0018:fffffe00000ebf20 EFLAGS: 00010006
+RAX: 8000000011000000 RBX: 0000000000030202 RCX: 0000000011000000
+RDX: ff1100010e068000 RSI: 0000000000004000 RDI: 0000000000000000
+RBP: fffffe00000ebf58 R08: ffffffff816346b3 R09: 0000000000000000
+R10: ffffffff92b216e7 R11: 0000000000000000 R12: 0000000000004000
+R13: 0000000000000001 R14: 0000000011000000 R15: 0000000000000000
+FS:  00007fb8f353a640(0000) GS:ff1100020dd19000(0000) knlGS:0000000000000000
+CS:  0010 DS: 0000 ES: 0000 CR0: 0000000080050033
+CR2: 00007fb8f3539fc8 CR3: 0000000175a9c000 CR4: 0000000000753ef0
+PKRU: 00000000
+Call Trace:
+ <#DB>
+ asm_exc_debug+0x1e/0x40 arch/x86/include/asm/idtentry.h:631
+RIP: 0010:copy_user_generic arch/x86/include/asm/uaccess_64.h:126 [inline]
+RIP: 0010:raw_copy_from_user arch/x86/include/asm/uaccess_64.h:141 [inline]
+RIP: 0010:_inline_copy_from_user include/linux/uaccess.h:185 [inline]
+RIP: 0010:_copy_from_user+0x97/0xd0 lib/usercopy.c:18
+Code: bf ba fc 89 ee 4c 89 ef 48 b8 00 f0 ff ff ff ff ff 00 48 39 c3 48 0f 47 d8 e8 25 9a 42 fd 0f 01 cb 4c 89 ef 48 89 de 48 89 e9 <f3> a4 0f 1f 00 49 89 cc 49 89 ce 0f 01 ca 31 ff 48 89 ce e8 b1 b9
+RSP: 0018:ffa0000004d2fce0 EFLAGS: 00050246
+RAX: 0000000000000001 RBX: 0000000000000000 RCX: 0000000000000077
+RDX: fff3fc00009a5fc6 RSI: 0000000000000001 RDI: ffa0000004d2fdb9
+RBP: 0000000000000078 R08: 0000000000000001 R09: fff3fc00009a5fc5
+R10: ffa0000004d2fe2f R11: 0000000000000001 R12: 0000000000000000
+R13: ffa0000004d2fdb8 R14: 0000000000000000 R15: 0000000000000000
+ </#DB>
+ <TASK>
+ copy_from_user include/linux/uaccess.h:222 [inline]
+ io_uring_setup+0xb3/0x21b0 io_uring/io_uring.c:3371
+ __do_sys_io_uring_setup io_uring/io_uring.c:3413 [inline]
+ __se_sys_io_uring_setup io_uring/io_uring.c:3404 [inline]
+ __x64_sys_io_uring_setup+0xce/0x180 io_uring/io_uring.c:3404
+ do_syscall_x64 arch/x86/entry/syscall_64.c:61 [inline]
+ do_syscall_64+0x132/0x7c0 arch/x86/entry/syscall_64.c:89
+ entry_SYSCALL_64_after_hwframe+0x77/0x7f
+RIP: 0033:0x7fb8f25b2b7d
+Code: 02 b8 ff ff ff ff c3 66 0f 1f 44 00 00 f3 0f 1e fa 48 89 f8 48 89 f7 48 89 d6 48 89 ca 4d 89 c2 4d 89 c8 4c 8b 4c 24 08 0f 05 <48> 3d 01 f0 ff ff 73 01 c3 48 c7 c1 a8 ff ff ff f7 d8 64 89 01 48
+RSP: 002b:00007fb8f3539f28 EFLAGS: 00000206 ORIG_RAX: 00000000000001a9
+RAX: ffffffffffffffda RBX: 0000000000000000 RCX: 00007fb8f25b2b7d
+RDX: 0000200000000140 RSI: 0000000000000000 RDI: 0000000000000f00
+RBP: 00007fb8f2650273 R08: 0000000000000000 R09: 0000000000000000
+R10: 0000200000000180 R11: 0000000000000206 R12: 0000200000000140
+R13: 0000200000000180 R14: 0000000000000000 R15: 00007fb8f351a000
+ </TASK>
+----------------
+Code disassembly (best guess):
+   0:	bf ba fc 89 ee       	mov    $0xee89fcba,%edi
+   5:	4c 89 ef             	mov    %r13,%rdi
+   8:	48 b8 00 f0 ff ff ff 	movabs $0xfffffffffff000,%rax
+   f:	ff ff 00
+  12:	48 39 c3             	cmp    %rax,%rbx
+  15:	48 0f 47 d8          	cmova  %rax,%rbx
+  19:	e8 25 9a 42 fd       	call   0xfd429a43
+  1e:	0f 01 cb             	stac
+  21:	4c 89 ef             	mov    %r13,%rdi
+  24:	48 89 de             	mov    %rbx,%rsi
+  27:	48 89 e9             	mov    %rbp,%rcx
+* 2a:	f3 a4                	rep movsb %ds:(%rsi),%es:(%rdi) <-- trapping instruction
+  2c:	0f 1f 00             	nopl   (%rax)
+  2f:	49 89 cc             	mov    %rcx,%r12
+  32:	49 89 ce             	mov    %rcx,%r14
+  35:	0f 01 ca             	clac
+  38:	31 ff                	xor    %edi,%edi
+  3a:	48 89 ce             	mov    %rcx,%rsi
+  3d:	e8                   	.byte 0xe8
+  3e:	b1 b9                	mov    $0xb9,%cl

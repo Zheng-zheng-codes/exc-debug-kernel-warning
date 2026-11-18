@@ -1,0 +1,3 @@
+{"attempt":1,"confirmed":false,"error":"context deadline exceeded","primed":true,"priming_programs":0,"replay_programs":90,"standard_error":"context deadline exceeded","status":"budget_exhausted","time":"2026-11-16T17:29:09.810319599Z","title":"WARNING in exc_debug_kernel"}
+{"attempt":2,"confirmed":false,"primed":true,"priming_programs":0,"replay_programs":201,"status":"budget_exhausted","time":"2026-11-17T11:12:19.417283447Z","title":"WARNING in exc_debug_kernel"}
+{"attempt":3,"confirmed":true,"primed":true,"priming_programs":0,"replay_programs":323,"status":"verified","time":"2026-11-17T16:49:38.406301806Z","title":"WARNING in exc_debug_kernel"}
