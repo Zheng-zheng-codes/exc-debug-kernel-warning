@@ -51,8 +51,10 @@ in the syzkaller VM.
   `-loadvm kernsight-state`), then run the testcase
 - 323 replay programs were used to construct the pre-crash state
 - Candidate 1 reproduced the warning from the frozen state
-- Independent manual snapshot restore on 2026-11-18 reproduced the same
+- Independent manual snapshot restores on 2026-11-18 reproduced the same
   `WARNING: arch/x86/kernel/traps.c:1286 at exc_debug_kernel`
+- The reliable trigger is `syz-execprog -procs=8 -repeat=0` (repeat until
+  the race fires); two consecutive clean-snapshot runs reproduced the warning
 - Fresh-VM replay of the full 324-entry recipe did **not** reproduce it in
   our tests (8/1/1 procs and 600 s runs)
 - Evidence: `reproducer/repro.outcomes.jsonl`, `reproducer/repro.stats`,
@@ -60,20 +62,48 @@ in the syzkaller VM.
 
 ## How to reproduce
 
-The reliable method is the same state snapshot used for verification:
-restore the exported QEMU state and then run the single testcase. The 4.5 GiB
-state snapshot is not included in this repository because of its size; it is
-available from the reporter on request.
+The verified state snapshot is included in this repository as a compressed,
+split archive under `snapshot/`. It contains the QEMU state (`kernsight-state`,
+4.5 GiB overlay), the exact base image, the kernel image, scratch disks, SSH
+test key, `repro.prog`, and ready-to-run `run-qemu.sh` / `reproduce.sh`.
 
 ```sh
-# 1. restore the exported state, for example:
-qemu-system-x86_64 ... -drive file=state/disk_qcow2-0.qcow2,if=ide,format=qcow2 \
-    ... -loadvm kernsight-state ...
+cd snapshot
+sha256sum -c SHA256SUMS
 
-# 2. in the resumed guest, as root:
-syz-execprog -executor=/syz-executor -repeat=1 -procs=1 \
+cat exc-debug-state-v7.4-rc3.tar.xz.part-* > /tmp/exc-debug-state-v7.4-rc3.tar.xz
+sha256sum /tmp/exc-debug-state-v7.4-rc3.tar.xz
+# 711dab9e0378bfbe629f17ee09c1ed75a7591403b1d2161c29b23a15c1b8ccc2
+
+xz -t /tmp/exc-debug-state-v7.4-rc3.tar.xz
+mkdir -p /tmp/exc-debug-state
+tar -xJf /tmp/exc-debug-state-v7.4-rc3.tar.xz -C /tmp/exc-debug-state
+cd /tmp/exc-debug-state
+./reproduce.sh
+```
+
+Expected output:
+
+```
+REPRODUCED: WARNING in exc_debug_kernel
+[ ... ] WARNING: arch/x86/kernel/traps.c:1286 at exc_debug_kernel+0x1c5/0x230 ...
+```
+
+`reproduce.sh` starts QEMU with `-loadvm kernsight-state`, waits for the
+guest, and runs:
+
+```sh
+syz-execprog -executor=/syz-executor -procs=8 -repeat=0 \
     -sandbox=none /root/repro.prog
 ```
+
+`-repeat=0` is intentional: the warning is a race, so the program repeats
+until the warning fires. The script polls the serial log and exits as soon as
+`traps.c:1286` appears. Two consecutive clean-snapshot runs reproduced it.
+
+Requirements: x86_64 Linux host with KVM, QEMU (tested with QEMU 6.2.0),
+`ssh`/`scp`, at least 8 GiB free RAM, and about 12 GiB free disk. Override the
+host SSH port with `SSH_PORT=... ./reproduce.sh` if 2222 is busy.
 
 The state snapshot already contains the post-replay, pre-crash kernel state;
 only `repro.prog` is needed after restore. `repro.kernsight.prog` is the
@@ -94,6 +124,8 @@ CONFIG_DEBUG_INFO=y, booted with `oops=panic` and `panic_on_warn=1`. See
   `repro.context.json`
 - `logs/log-0.txt`, `logs/report-0.txt`, `logs/machineInfo-0.txt`,
   `logs/title-stat.json`, `logs/snapshot-restore-serial.txt`
+- `snapshot/exc-debug-state-v7.4-rc3.tar.xz.part-*` — compressed state bundle
+- `snapshot/SHA256SUMS` — part checksums
 
 ## Notes
 

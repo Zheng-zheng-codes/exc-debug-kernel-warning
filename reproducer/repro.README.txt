@@ -8,7 +8,7 @@ the kernel state produced before it, so repro.prog alone is NOT enough.
 
 VERIFIED PATH FOR THIS BUG: restore the exported QEMU state snapshot
 (-loadvm kernsight-state), then run the single crashing testcase:
-  syz-execprog -repeat=1 -procs=1 repro.prog
+  syz-execprog -repeat=0 -procs=8 repro.prog
 The fresh-VM recipe below is provided for reconstruction, but replaying it
 on a fresh VM did not reproduce this state-dependent warning in our tests.
 repro.kernsight.prog is the state-reconstruction recipe (replayed crash-log
